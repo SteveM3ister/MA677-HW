@@ -1,0 +1,58 @@
+---
+title: "G&S 311"
+author: "Yinfeng Zhou"
+date: "2021/2/10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In the textbook, it is noted that the value for m satisties our requirements if and only if the graph of $\alpha$ enters the box from the bottom and leaves from the top. First, these power curve are generated with different value of m. If one curve, does not enter from the bottom, the value of $\alpha(0.6)$ will be higher than 0.05. That is, our probablity of making a type 1 error will be higher than 5 percent. On the other hand, if the curve does not leave the box at the top, the value of $\alpha(0.8)$ will be lower than 0.95. Then our probablity of type II error, $1-\alpha(0.8)$ will be higher than 0.05 and fail to meet our requirement.
+We then try to calculate what is the value of m in these two situations base on the equation $$\alpha=\sum_{k=m}^{n}{b(n,p,k)}$$.
+In the first situation, under null hypothesis, n=100, p=0.6, $\alpha=0.05$, we have $$0.05=\sum_{k=m}^{100}{b(100,0.6,k)}$$
+```{r}
+biterm<-function(n,p,k){
+  t=choose(n,k)*(p^k)*(1-p)^(n-k)
+}
+i=100
+p1=0.6
+n=100
+term=biterm(n,p1,i)
+while(term<0.05){
+  i=i-1
+  term=term+biterm(n,p1,i)
+}
+print(i+1)
+```
+There prints the result of the smallest value of m by the above R code. We then calculate the largerst value of m. 
+In the second situation, under alternative hypothesis, n=100, p=0.8, $\alpha=0.95$, we have $$0.95=\sum_{k=m}^{100}{b(100,0.8,k)}$$
+```{r}
+i=100
+p2=0.8
+term=biterm(n,p2,i)
+while(term<0.95){
+  i=i-1
+  term=term+biterm(n,p2,i)
+}
+print(i)
+```
+There prints the result of the largest value of m by R code. We then try to replicate figure 3.7
+```{r}
+x<-seq(0.4,1,0.001)
+alp<-function(m,n,p){
+  t=0
+  for(i in m:n){t=t+biterm(n,p,i)}
+  return(t)
+}
+
+y1<-alp(69,100,x)
+y2<-alp(73,100,x)
+plot(x,y1,col="RosyBrown",pch=16,cex=0.1,ylab="",main="Power Curve")
+points(x,y2,col="DarkTurquoise",pch=16,cex=0.1)
+lines(x,y2,col="DarkTurquoise",lty=1,cex=0.5)
+lines(x,y1,col="RosyBrown",lty=1,cex=0.5)
+points(c(0.6,0.6,0.8,0.8),c(0.05,0.95,0.95,0.05),pch=16,cex=0.01)
+lines(c(0.6,0.6,0.8,0.8,0.6),c(0.05,0.95,0.95,0.05,0.05),lty=2)
+```
